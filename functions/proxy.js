@@ -1,34 +1,34 @@
-// functions/proxy.js
 const https = require('https');
 
 exports.handler = async function(event, context) {
-  const url = decodeURIComponent(event.queryStringParameters.url);  // Get the URL to proxy from the query parameter
+  // Get the URL parameter from the query string
+  const url = decodeURIComponent(event.queryStringParameters.url);
 
-  // Check if URL is provided
+  // Check if the URL is missing
   if (!url) {
     return {
       statusCode: 400,
-      body: JSON.stringify({ error: 'Missing "url" parameter' })
+      body: JSON.stringify({ error: 'Missing "url" query parameter' })
     };
   }
 
   return new Promise((resolve, reject) => {
-    // Make an HTTPS request to the URL
+    // Make an HTTPS request to the given URL
     https.get(url, (response) => {
       let data = '';
 
-      // Accumulate data
+      // Accumulate data as it streams
       response.on('data', chunk => {
         data += chunk;
       });
 
-      // When response is finished, send back the data
+      // Once the request finishes, send the data back
       response.on('end', () => {
         resolve({
           statusCode: 200,
           body: data,
           headers: {
-            'Content-Type': 'text/html',
+            'Content-Type': 'text/html', // You can change this based on the content type
             'Cache-Control': 'no-cache'
           }
         });
